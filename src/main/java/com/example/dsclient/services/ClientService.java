@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.dsclient.dto.ClientDTO;
 import com.example.dsclient.entities.Client;
-import com.example.dsclient.repositories.ClientResource;
+import com.example.dsclient.repositories.ClientRepository;
 
 @Service
 public class ClientService {
     
     @Autowired
-    private ClientResource repository;
+    private ClientRepository repository;
 
     private ModelMapper mapper = new ModelMapper();
 
@@ -40,7 +40,7 @@ public class ClientService {
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id){
         Optional<Client> client = repository.findById(id);
-        ClientDTO dto = mapper.map(client, ClientDTO.class);
+        ClientDTO dto = mapper.map(client.get(), ClientDTO.class);
         return dto;
     }
 

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.example.dsclient.entities.Client;
 
 @Repository
-public interface ClientResource extends JpaRepository<Client, Long> {
+public interface ClientRepository extends JpaRepository<Client, Long> {
     
 }
