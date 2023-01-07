@@ -4,14 +4,17 @@ import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.dsclient.dto.ClientDTO;
 import com.example.dsclient.entities.Client;
 import com.example.dsclient.repositories.ClientRepository;
+import com.example.dsclient.services.exceptions.ResourceNotFoundException;
 
 @Service
 public class ClientService {
@@ -40,6 +43,9 @@ public class ClientService {
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id){
         Optional<Client> client = repository.findById(id);
+        if(client.isEmpty()){
+            throw new ResourceNotFoundException("Recurso nao encontrado");
+        }
         ClientDTO dto = mapper.map(client.get(), ClientDTO.class);
         return dto;
     }
@@ -58,16 +64,37 @@ public class ClientService {
         return dto;
     }
 
+    /**
+     * Metodo para atualizar o Client
+     * @param id do Client
+     * @param dto do Client
+     * @return Client ataulizado
+     */
     @Transactional
     public ClientDTO update(Long id, ClientDTO dto){
         dto.setId(id);
         Client client = mapper.map(dto, Client.class);
+        Optional<Client> findClient =repository.findById(client.getId());
+        if (findClient.isEmpty()){
+            throw new ResourceNotFoundException("Recurso nao encontrado");
+        }
         client = repository.save(client);
         return dto;
     }
 
+    /**
+     * 
+     * Metodo para deletar o Client
+     * @param id do CLient
+     */
+      @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id){
-        repository.deleteById(id);
+        try{
+            repository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException("Recurso nao encontrado");
+        }
+        
     }
 
 }
